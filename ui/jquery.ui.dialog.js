@@ -702,6 +702,11 @@ $.extend($.ui.dialog.overlay, {
 				if (dialog.options.closeOnEscape && event.keyCode &&
 					event.keyCode === $.ui.keyCode.ESCAPE ) {
 					
+					// find the 'top' overlay (by zIndex) and close its dialog
+					// Note: it's best to do this search here when we know we need it.
+					// Caching the top overlay at any point (like in dialog.moveToTop) is no better
+					// and if the dialog is closed my a mechanism other than the ESCAPE key on the overlay
+					// we would never use the cache.
 					$.grep(self.instances, function(instance){
 						return instance.zIndex() == $.ui.dialog.overlay.maxZ;
 					})[0].dialog.close(event);
