@@ -71,6 +71,7 @@ $.widget("ui.dialog", {
 						
 						self.close(event);
 						event.preventDefault();
+						event.stopPropagation();
 					}
 				})
 				.attr({
@@ -681,6 +682,7 @@ $.extend($.ui.dialog.overlay, {
 	events: $.map('focus,mousedown,mouseup,keydown,keypress,click'.split(','),
 		function(event) { return event + '.dialog-overlay'; }).join(' '),
 	create: function(dialog) {
+		var self = this;
 		if (this.instances.length === 0) {
 			// prevent use of anchors and inputs
 			// we use a setTimeout in case the overlay is created from an
@@ -694,14 +696,18 @@ $.extend($.ui.dialog.overlay, {
 					});
 				}
 			}, 1);
-
+			
 			// allow closing by pressing the escape key
 			$(document).bind('keydown.dialog-overlay', function(event) {
 				if (dialog.options.closeOnEscape && event.keyCode &&
-					event.keyCode === $.ui.keyCode.ESCAPE) {
+					event.keyCode === $.ui.keyCode.ESCAPE ) {
 					
-					dialog.close(event);
+					$.grep(self.instances, function(instance){
+						return instance.zIndex() == $.ui.dialog.overlay.maxZ;
+					})[0].dialog.close(event);
+
 					event.preventDefault();
+					event.stopPropagation();
 				}
 			});
 
@@ -715,6 +721,7 @@ $.extend($.ui.dialog.overlay, {
 				width: this.width(),
 				height: this.height()
 			});
+		$el.dialog = dialog;
 
 		if ($.fn.bgiframe) {
 			$el.bgiframe();
